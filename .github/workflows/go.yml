@@ -14,4 +14,4 @@ jobs:
       - name: Build
         run: go build -v ./cmd/onboard/*.go
       - name: Test with the Go CLI
-        run: go test
+        run: go test ./...
