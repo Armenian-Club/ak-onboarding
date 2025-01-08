@@ -3,15 +3,13 @@ package mm
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mattermost/mattermost/server/public/model"
-	"time"
 )
 
 func (c *client) InviteToTeam(ctx context.Context, email string) error {
-	//TODO implement me
-	//mmLogin := config.MMLogin
-	//mmPassword := config.MMPassword
 	response, err := c.modelClient.InviteUsersToTeam(ctx, config.MMArmenianClubId, []string{email})
 	if err != nil || response.StatusCode/100 != 2 {
 		return fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
@@ -39,7 +37,6 @@ func (c *client) GetChannelsList(ctx context.Context) ([]string, error) {
 }
 
 func (c *client) AddUserToChannels(ctx context.Context, email string) error {
-	//TODO implement me
 	channelsList, err := c.GetChannelsList(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get channels list: %w", err)
@@ -56,10 +53,5 @@ func (c *client) AddUserToChannels(ctx context.Context, email string) error {
 			return fmt.Errorf("failed to invite user to the channel with id %v: %w; status code: %v", channelId, err, response.StatusCode)
 		}
 	}
-	//c.modelClient.AddChannelMember()
-	//_, response, err := c.modelClient.InviteUsersToTeamAndChannelsGracefully(ctx, config.MMArmenianClubId, []string{email}, channelsList, "Message")
-	//if err != nil || response.StatusCode/100 != 2 {
-	//	return fmt.Errorf("failed to invite users: %w; status code: %v", err, response.StatusCode)
-	//}
 	return nil
 }

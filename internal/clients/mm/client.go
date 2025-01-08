@@ -2,6 +2,7 @@ package mm
 
 import (
 	"context"
+	
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mattermost/mattermost/server/public/model"
 )
@@ -18,7 +19,7 @@ type client struct {
 
 // NewClient конструктор клиента для работы с mattermost
 func NewClient() Client {
-	myClient := client{model.NewAPIv4Client(config.MMBasicUrl)}
+	myClient := client{modelClient: model.NewAPIv4Client(config.MMBasicUrl)}
 	myClient.modelClient.SetToken(config.MMBotAccessToken)
 	return &myClient
 }
