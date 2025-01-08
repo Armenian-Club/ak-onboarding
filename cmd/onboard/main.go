@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/drive"
@@ -14,7 +13,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	email := "example@gmail.com"
+	email := "davidyaylakhanyan@gmail.com"
 
 	mmClient := mm.NewClient()
 	calendarClient := calendar.NewClient()
