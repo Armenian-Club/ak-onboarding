@@ -2,7 +2,7 @@ package mm
 
 import (
 	"context"
-	
+
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mattermost/mattermost/server/public/model"
 )
@@ -13,13 +13,25 @@ type Client interface {
 	AddUserToChannels(ctx context.Context, email string) error
 }
 
+type http interface {
+	InviteUsersToTeam(ctx context.Context, teamId string, userEmails []string) (*model.Response, error)
+	GetPublicChannelsForTeam(ctx context.Context, teamId string, page int, perPage int, etag string) ([]*model.Channel, *model.Response, error)
+	GetUserByEmail(ctx context.Context, email, etag string) (*model.User, *model.Response, error)
+	AddChannelMember(ctx context.Context, channelId, userId string) (*model.ChannelMember, *model.Response, error)
+}
+
 type client struct {
-	modelClient *model.Client4
+	modelClient http
+	armClubID   string
 }
 
 // NewClient конструктор клиента для работы с mattermost
 func NewClient() Client {
-	myClient := client{modelClient: model.NewAPIv4Client(config.MMBasicUrl)}
-	myClient.modelClient.SetToken(config.MMBotAccessToken)
+	c := model.NewAPIv4Client(config.MMBasicUrl)
+	c.SetToken(config.MMBotAccessToken)
+	myClient := client{
+		modelClient: c,
+		armClubID:   config.MMArmenianClubId,
+	}
 	return &myClient
 }

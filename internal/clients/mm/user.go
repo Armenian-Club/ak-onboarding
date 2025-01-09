@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mattermost/mattermost/server/public/model"
 )
 
 func (c *client) InviteToTeam(ctx context.Context, email string) error {
-	response, err := c.modelClient.InviteUsersToTeam(ctx, config.MMArmenianClubId, []string{email})
+	response, err := c.modelClient.InviteUsersToTeam(ctx, c.armClubID, []string{email})
 	if err != nil || response.StatusCode/100 != 2 {
+		// TODO и тут
 		return fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
 	}
 	return nil
@@ -21,7 +21,7 @@ func filterChannels(allChannels []*model.Channel) []string {
 	limit := time.Now().AddDate(0, 0, -180)
 	var channelIds []string
 	for _, channel := range allChannels {
-		if !time.Unix(int64(channel.LastPostAt), 0).Before(limit) {
+		if !time.Unix(channel.LastPostAt, 0).Before(limit) {
 			channelIds = append(channelIds, channel.Id)
 		}
 	}
@@ -29,8 +29,9 @@ func filterChannels(allChannels []*model.Channel) []string {
 }
 
 func (c *client) GetChannelsList(ctx context.Context) ([]string, error) {
-	channels, response, err := c.modelClient.GetPublicChannelsForTeam(ctx, config.MMArmenianClubId, 0, 1000, "")
+	channels, response, err := c.modelClient.GetPublicChannelsForTeam(ctx, c.armClubID, 0, 1000, "")
 	if err != nil || response.StatusCode/100 != 2 {
+		// TODO и тут
 		return nil, fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
 	}
 	return filterChannels(channels), nil
@@ -43,6 +44,7 @@ func (c *client) AddUserToChannels(ctx context.Context, email string) error {
 	}
 	user, response, err := c.modelClient.GetUserByEmail(ctx, email, "")
 	if err != nil || response.StatusCode/100 != 2 {
+		// TODO поменять ошибку чтоб без nil pointer dereference
 		return fmt.Errorf("failed to get user by id: %w; status code: %v", err, response.StatusCode)
 	}
 	userId := user.Id
