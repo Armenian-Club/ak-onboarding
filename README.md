@@ -7,6 +7,9 @@
 ```
 MM_LOGIN=example
 MM_PASSWORD=example
+MM_ARMENIAN_CLUB_ID=example
+MM_BASIC_URL=example
+MM_BOT_ACCESS_TOKEN=example
 ```
 - build and run project
 ```bash
