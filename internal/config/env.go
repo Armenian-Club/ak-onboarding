@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	// MMLogin login for admin account mattermost. MM_LOGIN
-	MMLogin string
-	// MMPassword password for mattermost. MM_PASSWORD
-	MMPassword string
+	// MMArmenianClubId The id of our team
+	MMArmenianClubId string
+	// MMBasicUrl Basic url of queries
+	MMBasicUrl       string
+	MMBotAccessToken string
 )
 
 func init() {
@@ -19,6 +20,7 @@ func init() {
 	if err != nil {
 		slog.Error("Error loading .env file", "error", err)
 	}
-	MMLogin = os.Getenv("MM_LOGIN")
-	MMPassword = os.Getenv("MM_PASSWORD")
+	MMArmenianClubId = os.Getenv("MM_ARMENIAN_CLUB_ID")
+	MMBasicUrl = os.Getenv("MM_BASIC_URL")
+	MMBotAccessToken = os.Getenv("MM_BOT_ACCESS_TOKEN")
 }

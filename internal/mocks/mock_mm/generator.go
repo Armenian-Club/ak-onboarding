@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	model "github.com/mattermost/mattermost/server/public/model"
 )
 
 // MockClient is a mock of Client interface.
@@ -60,4 +61,90 @@ func (m *MockClient) InviteToTeam(ctx context.Context, email string) error {
 func (mr *MockClientMockRecorder) InviteToTeam(ctx, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InviteToTeam", reflect.TypeOf((*MockClient)(nil).InviteToTeam), ctx, email)
+}
+
+// Mockhttp is a mock of http interface.
+type Mockhttp struct {
+	ctrl     *gomock.Controller
+	recorder *MockhttpMockRecorder
+}
+
+// MockhttpMockRecorder is the mock recorder for Mockhttp.
+type MockhttpMockRecorder struct {
+	mock *Mockhttp
+}
+
+// NewMockhttp creates a new mock instance.
+func NewMockhttp(ctrl *gomock.Controller) *Mockhttp {
+	mock := &Mockhttp{ctrl: ctrl}
+	mock.recorder = &MockhttpMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *Mockhttp) EXPECT() *MockhttpMockRecorder {
+	return m.recorder
+}
+
+// AddChannelMember mocks base method.
+func (m *Mockhttp) AddChannelMember(ctx context.Context, channelId, userId string) (*model.ChannelMember, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddChannelMember", ctx, channelId, userId)
+	ret0, _ := ret[0].(*model.ChannelMember)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// AddChannelMember indicates an expected call of AddChannelMember.
+func (mr *MockhttpMockRecorder) AddChannelMember(ctx, channelId, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddChannelMember", reflect.TypeOf((*Mockhttp)(nil).AddChannelMember), ctx, channelId, userId)
+}
+
+// GetPublicChannelsForTeam mocks base method.
+func (m *Mockhttp) GetPublicChannelsForTeam(ctx context.Context, teamId string, page, perPage int, etag string) ([]*model.Channel, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPublicChannelsForTeam", ctx, teamId, page, perPage, etag)
+	ret0, _ := ret[0].([]*model.Channel)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetPublicChannelsForTeam indicates an expected call of GetPublicChannelsForTeam.
+func (mr *MockhttpMockRecorder) GetPublicChannelsForTeam(ctx, teamId, page, perPage, etag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicChannelsForTeam", reflect.TypeOf((*Mockhttp)(nil).GetPublicChannelsForTeam), ctx, teamId, page, perPage, etag)
+}
+
+// GetUserByEmail mocks base method.
+func (m *Mockhttp) GetUserByEmail(ctx context.Context, email, etag string) (*model.User, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByEmail", ctx, email, etag)
+	ret0, _ := ret[0].(*model.User)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockhttpMockRecorder) GetUserByEmail(ctx, email, etag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*Mockhttp)(nil).GetUserByEmail), ctx, email, etag)
+}
+
+// InviteUsersToTeam mocks base method.
+func (m *Mockhttp) InviteUsersToTeam(ctx context.Context, teamId string, userEmails []string) (*model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InviteUsersToTeam", ctx, teamId, userEmails)
+	ret0, _ := ret[0].(*model.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InviteUsersToTeam indicates an expected call of InviteUsersToTeam.
+func (mr *MockhttpMockRecorder) InviteUsersToTeam(ctx, teamId, userEmails interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InviteUsersToTeam", reflect.TypeOf((*Mockhttp)(nil).InviteUsersToTeam), ctx, teamId, userEmails)
 }
