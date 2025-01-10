@@ -5,8 +5,6 @@
 - Create file `.env` in `secrets/` directory
 - Fill it with necessary vars. (check it [here](./internal/config/env.go))
 ```
-MM_LOGIN=example
-MM_PASSWORD=example
 MM_ARMENIAN_CLUB_ID=example
 MM_BASIC_URL=example
 MM_BOT_ACCESS_TOKEN=example
