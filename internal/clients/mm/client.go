@@ -10,6 +10,7 @@ import (
 // Client интерфейс для работы с mattermost
 type Client interface {
 	InviteToTeam(ctx context.Context, email string) error
+	IsUserInTeam(ctx context.Context, email string) (bool, error)
 	AddUserToChannels(ctx context.Context, email string) error
 }
 
@@ -18,6 +19,7 @@ type http interface {
 	GetPublicChannelsForTeam(ctx context.Context, teamId string, page int, perPage int, etag string) ([]*model.Channel, *model.Response, error)
 	GetUserByEmail(ctx context.Context, email, etag string) (*model.User, *model.Response, error)
 	AddChannelMember(ctx context.Context, channelId, userId string) (*model.ChannelMember, *model.Response, error)
+	GetTeamMember(ctx context.Context, teamId string, userId string, etag string) (*model.TeamMember, *model.Response, error)
 }
 
 type client struct {
@@ -33,5 +35,6 @@ func NewClient() Client {
 		modelClient: c,
 		armClubID:   config.MMArmenianClubId,
 	}
+	c.InviteUsersToTeam()
 	return &myClient
 }

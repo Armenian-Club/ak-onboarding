@@ -3,6 +3,7 @@ package mm
 import (
 	"context"
 	"fmt"
+	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"time"
 
 	"github.com/mattermost/mattermost/server/public/model"
@@ -66,4 +67,22 @@ func (c *client) AddUserToChannels(ctx context.Context, email string) error {
 		}
 	}
 	return nil
+}
+
+func (c *client) IsUserInTeam(ctx context.Context, email string) (bool, error) {
+	user, response, err := c.modelClient.GetUserByEmail(ctx, email, "")
+	if response == nil {
+		return false, fmt.Errorf("failed to make response: %w; response: %v", err, nil)
+	}
+	if err != nil || response.StatusCode/100 != 2 {
+		return false, fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
+	}
+	teamMember, response, err := c.modelClient.GetTeamMember(ctx, config.MMArmenianClubId, user.Id, "")
+	if response == nil {
+		return false, fmt.Errorf("failed to make response: %w; response: %v", err, nil)
+	}
+	if err != nil || response.StatusCode/100 != 2 {
+		return false, fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
+	}
+	return teamMember.DeleteAt == 0 && (teamMember.SchemeUser || teamMember.SchemeAdmin), nil
 }
