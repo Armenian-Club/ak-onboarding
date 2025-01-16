@@ -16,12 +16,12 @@ func (a *app) Onboard(ctx context.Context, email, gmail string) error {
 		return errors.Wrap(err, "failed to invite to team")
 	}
 
-	go func() {
+	go func(email string) {
 		err := a.AddMmUserAfterJoin(email)
 		if err != nil {
 			log.Println(err)
 		}
-	}()
+	}(email)
 
 	if err = a.dr.AddUser(ctx, gmail); err != nil {
 		return errors.Wrap(err, "failed to add user to google drive")
@@ -51,7 +51,7 @@ func (a *app) AddMmUserAfterJoin(email string) error {
 				}
 				return nil
 			}
-			log.Println("User is not in the team.")
+			log.Printf("User %v is not in the team.", email)
 		case <-ctx.Done():
 			return errors.New("time is out")
 		}

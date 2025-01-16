@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/drive"
@@ -27,5 +25,4 @@ func main() {
 		return
 	}
 	fmt.Printf("onboarding for %v -- finished successfully\n", email)
-	time.Sleep(time.Hour)
 }
