@@ -49,7 +49,7 @@ func (a *app) AddMmUserAfterJoin(email string, tick time.Duration) error {
 				}
 				return nil
 			}
-			log.Println("User is not in the team.")
+			log.Printf("User %v is not in the team.", email)
 		case <-ctx.Done():
 			return errors.New("time is out")
 		}
