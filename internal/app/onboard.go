@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -18,7 +19,7 @@ func (a *app) Onboard(ctx context.Context, email, gmail string) error {
 	go func() {
 		err := a.AddMmUserAfterJoin(email)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 	}()
 
@@ -42,21 +43,18 @@ func (a *app) AddMmUserAfterJoin(email string) error {
 		case <-ticker.C:
 			localInTeam, err := a.mm.IsUserInTeam(ctx, email)
 			if err != nil {
-				fmt.Println(fmt.Errorf("failed to check user in team %w", err))
+				log.Println(fmt.Errorf("failed to check user in team %w", err))
 			}
 			if localInTeam {
 				if err = a.mm.AddUserToChannels(ctx, email); err != nil {
-					myErr := errors.Wrap(err, "failed to add users to channel")
-					fmt.Println(myErr)
-					return myErr
+					return errors.Wrap(err, "failed to add users to channel")
 				}
 				return nil
 			}
-			fmt.Println("User is not in the team.")
+			log.Println("User is not in the team.")
 		case <-ctx.Done():
-			fmt.Println("time is out")
-			return nil
+			return errors.New("time is out")
 		}
-		fmt.Println("User is added to mattermost")
+		log.Println("User is added to mattermost")
 	}
 }

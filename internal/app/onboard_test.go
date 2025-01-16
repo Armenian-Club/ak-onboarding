@@ -42,8 +42,6 @@ func TestApp_Onboard(t *testing.T) {
 			mockMm: func(mm *mock_mm.MockClient) {
 				mm.EXPECT().InviteToTeam(gomock.Any(), "test@yandex.ru").
 					Return(nil)
-				mm.EXPECT().AddUserToChannels(gomock.Any(), "test@yandex.ru").
-					Return(nil)
 			},
 		},
 	}
