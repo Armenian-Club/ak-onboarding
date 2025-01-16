@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/drive"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/mm"
@@ -10,7 +11,6 @@ import (
 // Onboarder интерфейс выполняющий онбординг новичка
 type Onboarder interface {
 	Onboard(ctx context.Context, email, gmail string) error
-	AddMmUserAfterJoin(email string) error
 }
 
 type app struct {
