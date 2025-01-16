@@ -15,7 +15,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	email := "example@gmail.ru"
+	email := "example@gmail.com"
 
 	mmClient := mm.NewClient()
 	calendarClient := calendar.NewClient()
