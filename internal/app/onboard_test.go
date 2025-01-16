@@ -1,4 +1,4 @@
-package app_test
+package app
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"github.com/Armenian-Club/ak-onboarding/internal/mocks/mock_calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/mocks/mock_drive"
 	"github.com/Armenian-Club/ak-onboarding/internal/mocks/mock_mm"
@@ -59,7 +58,11 @@ func TestApp_Onboard(t *testing.T) {
 			tt.mockCal(cal)
 			tt.mockDr(dr)
 			tt.mockMm(mm)
-			a := app.New(mm, cal, dr)
+			a := &app{
+				mm:  mm,
+				cal: cal,
+				dr:  dr,
+			}
 			err := a.Onboard(ctx, tt.email, tt.gmail)
 			if !strings.Contains(fmt.Sprint(err), fmt.Sprint(tt.wantErr)) {
 				t.Errorf("Onboard() error = %v, wantErr %v", err, tt.wantErr)
@@ -112,8 +115,12 @@ func TestApp_AddMmUserAfterJoin(t *testing.T) {
 			dr := mock_drive.NewMockClient(ctrl)
 			mm := mock_mm.NewMockClient(ctrl)
 			tt.mockMm(mm)
-			a := app.New(mm, cal, dr)
-			err := a.AddMmUserAfterJoin(tt.email)
+			a := &app{
+				mm:  mm,
+				cal: cal,
+				dr:  dr,
+			}
+			err := a.AddMmUserAfterJoin(tt.email, 100*time.Millisecond)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AddMmUserAfterJoin() error = %v, wantErr %v", err, tt.wantErr)
 			}

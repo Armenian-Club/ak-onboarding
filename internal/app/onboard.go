@@ -15,14 +15,12 @@ func (a *app) Onboard(ctx context.Context, email, gmail string) error {
 		// TODO надо бы как-то создать и ловить свои кастомные ошибки чтоб ретраить или не ретраить
 		return errors.Wrap(err, "failed to invite to team")
 	}
-
 	go func(email string) {
-		err := a.AddMmUserAfterJoin(email)
+		err := a.AddMmUserAfterJoin(email, time.Minute)
 		if err != nil {
 			log.Println(err)
 		}
 	}(email)
-
 	if err = a.dr.AddUser(ctx, gmail); err != nil {
 		return errors.Wrap(err, "failed to add user to google drive")
 	}
@@ -32,10 +30,10 @@ func (a *app) Onboard(ctx context.Context, email, gmail string) error {
 	return nil
 }
 
-func (a *app) AddMmUserAfterJoin(email string) error {
+func (a *app) AddMmUserAfterJoin(email string, tick time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 24*time.Hour)
 	defer cancel()
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(tick)
 	defer ticker.Stop()
 
 	for {
