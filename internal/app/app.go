@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/drive"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/mm"

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/drive"

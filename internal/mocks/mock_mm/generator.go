@@ -63,6 +63,21 @@ func (mr *MockClientMockRecorder) InviteToTeam(ctx, email interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InviteToTeam", reflect.TypeOf((*MockClient)(nil).InviteToTeam), ctx, email)
 }
 
+// IsUserInTeam mocks base method.
+func (m *MockClient) IsUserInTeam(ctx context.Context, email string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsUserInTeam", ctx, email)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsUserInTeam indicates an expected call of IsUserInTeam.
+func (mr *MockClientMockRecorder) IsUserInTeam(ctx, email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsUserInTeam", reflect.TypeOf((*MockClient)(nil).IsUserInTeam), ctx, email)
+}
+
 // Mockhttp is a mock of http interface.
 type Mockhttp struct {
 	ctrl     *gomock.Controller
@@ -116,6 +131,22 @@ func (m *Mockhttp) GetPublicChannelsForTeam(ctx context.Context, teamId string, 
 func (mr *MockhttpMockRecorder) GetPublicChannelsForTeam(ctx, teamId, page, perPage, etag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicChannelsForTeam", reflect.TypeOf((*Mockhttp)(nil).GetPublicChannelsForTeam), ctx, teamId, page, perPage, etag)
+}
+
+// GetTeamMember mocks base method.
+func (m *Mockhttp) GetTeamMember(ctx context.Context, teamId, userId, etag string) (*model.TeamMember, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTeamMember", ctx, teamId, userId, etag)
+	ret0, _ := ret[0].(*model.TeamMember)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetTeamMember indicates an expected call of GetTeamMember.
+func (mr *MockhttpMockRecorder) GetTeamMember(ctx, teamId, userId, etag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamMember", reflect.TypeOf((*Mockhttp)(nil).GetTeamMember), ctx, teamId, userId, etag)
 }
 
 // GetUserByEmail mocks base method.

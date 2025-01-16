@@ -352,3 +352,87 @@ func TestClient_AddUserToChannels(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_IsUserInTeam(t *testing.T) {
+	t.Parallel()
+	armClubId, userId, okResponse, fatalResponse := uuid.NewString(), uuid.NewString(), model.Response{
+		StatusCode: 200,
+	}, model.Response{
+		StatusCode: 404,
+	}
+	user := model.User{Id: userId}
+	memberInTeam, memberOutOfTeam := model.TeamMember{
+		TeamId:     armClubId,
+		UserId:     userId,
+		DeleteAt:   0,
+		SchemeUser: true,
+	}, model.TeamMember{
+		TeamId:     armClubId,
+		UserId:     userId,
+		DeleteAt:   89765443,
+		SchemeUser: true,
+	}
+
+	cases := []struct {
+		name    string
+		email   string
+		mockMm  func(m *mock_mm.Mockhttp)
+		wantIn  bool
+		wantErr bool
+	}{
+		{
+			name:  "success",
+			email: "test@test.com",
+			mockMm: func(m *mock_mm.Mockhttp) {
+				m.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com", "").
+					Return(&user, &okResponse, nil)
+				m.EXPECT().GetTeamMember(gomock.Any(), armClubId, userId, "").
+					Return(&memberInTeam, &okResponse, nil)
+			},
+			wantIn:  true,
+			wantErr: false,
+		},
+		{
+			name:  "deleted",
+			email: "test@test.com",
+			mockMm: func(m *mock_mm.Mockhttp) {
+				m.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com", "").
+					Return(&user, &okResponse, nil)
+				m.EXPECT().GetTeamMember(gomock.Any(), armClubId, userId, "").
+					Return(&memberOutOfTeam, &okResponse, nil)
+			},
+			wantIn:  false,
+			wantErr: false,
+		},
+		{
+			name:  "fatal",
+			email: "test@test.com",
+			mockMm: func(m *mock_mm.Mockhttp) {
+				m.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com", "").
+					Return(nil, &fatalResponse, fmt.Errorf("user is not found"))
+			},
+			wantIn:  false,
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockHttp := mock_mm.NewMockhttp(ctrl)
+			tc.mockMm(mockHttp)
+			cl := client{
+				modelClient: mockHttp,
+				armClubID:   armClubId,
+			}
+			inTeam, err := cl.IsUserInTeam(ctx, tc.email)
+			if (err != nil) != tc.wantErr || inTeam != tc.wantIn {
+				t.Errorf("client.InviteToTeam() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
