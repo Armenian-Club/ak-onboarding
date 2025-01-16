@@ -3,7 +3,6 @@ package mm
 import (
 	"context"
 	"fmt"
-	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"time"
 
 	"github.com/mattermost/mattermost/server/public/model"
@@ -77,7 +76,7 @@ func (c *client) IsUserInTeam(ctx context.Context, email string) (bool, error) {
 	if err != nil || response.StatusCode/100 != 2 {
 		return false, fmt.Errorf("failed to make response: %w; status code: %v", err, response.StatusCode)
 	}
-	teamMember, response, err := c.modelClient.GetTeamMember(ctx, config.MMArmenianClubId, user.Id, "")
+	teamMember, response, err := c.modelClient.GetTeamMember(ctx, c.armClubID, user.Id, "")
 	if response == nil {
 		return false, fmt.Errorf("failed to make response: %w; response: %v", err, nil)
 	}

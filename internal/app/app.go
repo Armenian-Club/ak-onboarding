@@ -10,6 +10,7 @@ import (
 // Onboarder интерфейс выполняющий онбординг новичка
 type Onboarder interface {
 	Onboard(ctx context.Context, email, gmail string) error
+	AddMmUserAfterJoin(email string) error
 }
 
 type app struct {

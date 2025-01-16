@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"github.com/Armenian-Club/ak-onboarding/internal/clients/calendar"
@@ -14,7 +15,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	email := "example@gmail.com"
+	email := "daniely4ns@yandex.ru"
 
 	mmClient := mm.NewClient()
 	calendarClient := calendar.NewClient()
@@ -26,4 +27,5 @@ func main() {
 		return
 	}
 	fmt.Printf("onboarding for %v -- finished successfully\n", email)
+	time.Sleep(time.Hour)
 }

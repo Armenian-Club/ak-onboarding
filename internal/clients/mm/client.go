@@ -35,6 +35,5 @@ func NewClient() Client {
 		modelClient: c,
 		armClubID:   config.MMArmenianClubId,
 	}
-	c.InviteUsersToTeam()
 	return &myClient
 }
