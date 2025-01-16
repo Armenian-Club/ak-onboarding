@@ -55,6 +55,6 @@ func (a *app) AddMmUserAfterJoin(email string) error {
 		case <-ctx.Done():
 			return errors.New("time is out")
 		}
-		log.Println("User is added to mattermost")
+		log.Printf("User %v is added to mattermost", email)
 	}
 }
