@@ -13,6 +13,7 @@ var (
 	// MMBasicUrl Basic url of queries
 	MMBasicUrl       string
 	MMBotAccessToken string
+	FolderID string
 )
 
 func init() {
@@ -23,4 +24,5 @@ func init() {
 	MMArmenianClubId = os.Getenv("MM_ARMENIAN_CLUB_ID")
 	MMBasicUrl = os.Getenv("MM_BASIC_URL")
 	MMBotAccessToken = os.Getenv("MM_BOT_ACCESS_TOKEN")
+	FolderID = os.Getenv("FOLDER_ID")
 }
