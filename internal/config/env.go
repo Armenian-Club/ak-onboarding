@@ -1,10 +1,9 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -13,7 +12,8 @@ var (
 	// MMBasicUrl Basic url of queries
 	MMBasicUrl       string
 	MMBotAccessToken string
-	FolderID string
+	FolderID         string
+	BotToken         string
 )
 
 func init() {
@@ -25,4 +25,5 @@ func init() {
 	MMBasicUrl = os.Getenv("MM_BASIC_URL")
 	MMBotAccessToken = os.Getenv("MM_BOT_ACCESS_TOKEN")
 	FolderID = os.Getenv("FOLDER_ID")
+	BotToken = os.Getenv("BOT_TOKEN")
 }
