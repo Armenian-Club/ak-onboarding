@@ -18,7 +18,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	bottg.BotRun(&ctx, bot)
+	bottg.Run(ctx, bot)
 	/*email := "example@gmail.com"
 	jsonCreds, err := os.ReadFile(config.GoogleCredsPath)
 	if err != nil{

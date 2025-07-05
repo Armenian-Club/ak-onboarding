@@ -6,9 +6,9 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-func BotRun(ctx *context.Context, bot *telego.Bot) {
+func Run(ctx context.Context, bot *telego.Bot) {
 
-	updates, _ := bot.UpdatesViaLongPolling(*ctx, nil)
+	updates, _ := bot.UpdatesViaLongPolling(ctx, nil)
 
 	for update := range updates {
 		if update.Message != nil {
@@ -23,7 +23,7 @@ func BotRun(ctx *context.Context, bot *telego.Bot) {
 				chatID,
 				"Hello Bro",
 			).WithReplyMarkup(keyboard)
-			_, _ = bot.SendMessage(*ctx, message)
+			_, _ = bot.SendMessage(ctx, message)
 		}
 	}
 }
