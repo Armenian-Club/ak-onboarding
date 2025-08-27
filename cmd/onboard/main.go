@@ -2,23 +2,21 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/Armenian-Club/ak-onboarding/internal/bottg"
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mymmrac/telego"
-	"os"
+	"log"
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	botToken := config.BotToken
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
-	bottg.Run(ctx, bot)
+
+	app := bottg.NewBotApp(bot)
+	app.Run(context.Background())
 	/*email := "example@gmail.com"
 	jsonCreds, err := os.ReadFile(config.GoogleCredsPath)
 	if err != nil{

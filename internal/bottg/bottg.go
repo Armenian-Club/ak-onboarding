@@ -2,28 +2,64 @@ package bottg
 
 import (
 	"context"
+	"sync"
+
 	"github.com/mymmrac/telego"
-	tu "github.com/mymmrac/telego/telegoutil"
+	th "github.com/mymmrac/telego/telegohandler"
 )
 
-func Run(ctx context.Context, bot *telego.Bot) {
+// --- Состояния внутри сценария ---
+type ConvState uint
 
-	updates, _ := bot.UpdatesViaLongPolling(ctx, nil)
+const (
+	StateDefault ConvState = iota
+	StateAskEmail
+	StateConfirm
+)
 
-	for update := range updates {
-		if update.Message != nil {
-			chatID := tu.ID(update.Message.Chat.ID)
-			keyboard := tu.Keyboard(
-				tu.KeyboardRow(
-					tu.KeyboardButton("Старт"),
-					tu.KeyboardButton("Отправить на подтверждение"),
-				),
-			)
-			message := tu.Message(
-				chatID,
-				"Hello Bro",
-			).WithReplyMarkup(keyboard)
-			_, _ = bot.SendMessage(ctx, message)
-		}
+// --- Сценарии ---
+type Scenario string
+
+const (
+	ScenarioNone       Scenario = ""
+	ScenarioOnboarding Scenario = "onboarding"
+	ScenarioInfo       Scenario = "info"
+)
+
+// --- Пользователь ---
+type User struct {
+	Name      string
+	Scenario  Scenario
+	ConvState ConvState
+	Email     string
+	Gmail     string
+}
+
+// --- Приложение бота ---
+type BotApp struct {
+	bot   *telego.Bot
+	users map[int64]User
+	lock  sync.RWMutex
+}
+
+// --- Конструктор ---
+func NewBotApp(bot *telego.Bot) *BotApp {
+	return &BotApp{
+		bot:   bot,
+		users: make(map[int64]User),
 	}
+}
+
+// --- Запуск приложения ---
+func (app *BotApp) Run(ctx context.Context) {
+	updates, _ := app.bot.UpdatesViaLongPolling(ctx, nil)
+	bh, _ := th.NewBotHandler(app.bot, updates)
+
+	// Привязка методов
+	bh.Handle(app.HandleStart, th.CommandEqual("start"))
+	bh.HandleCallbackQuery(app.HandleCallback)
+	bh.HandleMessage(app.HandleMessage)
+
+	defer func() { _ = bh.Stop() }()
+	_ = bh.Start()
 }
