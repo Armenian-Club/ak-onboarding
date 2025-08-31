@@ -8,7 +8,7 @@ import (
 	th "github.com/mymmrac/telego/telegohandler"
 )
 
-// --- Состояния внутри сценария ---
+// ConvState --- Состояния внутри сценария ---
 type ConvState uint
 
 const (
@@ -17,7 +17,7 @@ const (
 	StateConfirm
 )
 
-// --- Сценарии ---
+// Scenario --- Сценарии ---
 type Scenario string
 
 const (
@@ -26,7 +26,7 @@ const (
 	ScenarioInfo       Scenario = "info"
 )
 
-// --- Пользователь ---
+// User --- Пользователь ---
 type User struct {
 	Name      string
 	Scenario  Scenario
@@ -35,14 +35,14 @@ type User struct {
 	Gmail     string
 }
 
-// --- Приложение бота ---
+// BotApp --- Приложение бота ---
 type BotApp struct {
 	bot   *telego.Bot
 	users map[int64]User
 	lock  sync.RWMutex
 }
 
-// --- Конструктор ---
+// NewBotApp --- Конструктор ---
 func NewBotApp(bot *telego.Bot) *BotApp {
 	return &BotApp{
 		bot:   bot,
@@ -50,7 +50,7 @@ func NewBotApp(bot *telego.Bot) *BotApp {
 	}
 }
 
-// --- Запуск приложения ---
+// Run --- Запуск приложения ---
 func (app *BotApp) Run(ctx context.Context) {
 	updates, _ := app.bot.UpdatesViaLongPolling(ctx, nil)
 	bh, _ := th.NewBotHandler(app.bot, updates)

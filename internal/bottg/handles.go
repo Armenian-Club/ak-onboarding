@@ -21,7 +21,7 @@ func handleOnboarding(ctx *th.Context, msg telego.Message, bot *telego.Bot, user
 		} else if strings.HasSuffix(addr.Address, "@gmail.com") {
 			user.Gmail = addr.Address
 			user.ConvState = StateConfirm
-			text = fmt.Sprintf("Вы указали почту(ы): %s %s. Верно? (Да/Нет)", user.Gmail, user.Email)
+			text = fmt.Sprintf("Вы указали почту(ы): %s %s. Верно? (Да/Нет)", user.Email, user.Gmail)
 
 			keyboard := &telego.ReplyKeyboardMarkup{
 				Keyboard: [][]telego.KeyboardButton{
@@ -34,7 +34,9 @@ func handleOnboarding(ctx *th.Context, msg telego.Message, bot *telego.Bot, user
 			_, _ = bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(keyboard))
 			return
 		} else {
-			user.Email = addr.Address
+			if user.Email == "" {
+				user.Email = addr.Address
+			}
 			text = "Для работы сервисов Google введите, пожалуйста, Gmail."
 		}
 
@@ -44,14 +46,17 @@ func handleOnboarding(ctx *th.Context, msg telego.Message, bot *telego.Bot, user
 			user.ConvState = StateDefault
 			user.Scenario = ScenarioNone
 		} else {
-			text = "Хорошо, давайте попробуем ещё раз. Введите Gmail:"
+			text = "Хорошо, давайте попробуем ещё раз. Введите почту:"
+			user.Email = ""
+			user.Gmail = ""
 			user.ConvState = StateAskEmail
 		}
+	default:
+		panic("unhandled default case")
 	}
 
-	if text != "" {
-		_, _ = bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text))
-	}
+	_, _ = bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text))
+
 }
 
 // --- Обработка сценария Info ---

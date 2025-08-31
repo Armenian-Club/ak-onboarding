@@ -7,7 +7,7 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
-// --- /start ---
+// HandleStart --- /start ---
 func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 	userID := update.Message.From.ID
 	userName := update.Message.From.FirstName
@@ -34,7 +34,7 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 	return nil
 }
 
-// --- CallbackQuery ---
+// HandleCallback --- CallbackQuery ---
 func (app *BotApp) HandleCallback(ctx *th.Context, cq telego.CallbackQuery) error {
 	userID := cq.From.ID
 	userName := cq.From.FirstName
@@ -82,7 +82,7 @@ func (app *BotApp) HandleCallback(ctx *th.Context, cq telego.CallbackQuery) erro
 	return nil
 }
 
-// --- Сообщения ---
+// HandleMessage --- Сообщения ---
 func (app *BotApp) HandleMessage(ctx *th.Context, msg telego.Message) error {
 	userID := msg.From.ID
 
