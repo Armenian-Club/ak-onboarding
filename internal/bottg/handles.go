@@ -2,10 +2,12 @@ package bottg
 
 import (
 	"fmt"
+	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"net/mail"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +18,7 @@ func handleOnboarding(ctx *th.Context, msg telego.Message, bot *telego.Bot, user
 	switch user.ConvState {
 	case StateAskEmail:
 		addr, err := mail.ParseAddress(msg.Text)
+		user.Username = msg.From.Username
 		if err != nil {
 			text = "Неправильный формат почты, попробуйте ещё раз."
 		} else if strings.HasSuffix(addr.Address, "@gmail.com") {
@@ -41,15 +44,50 @@ func handleOnboarding(ctx *th.Context, msg telego.Message, bot *telego.Bot, user
 		}
 
 	case StateConfirm:
+		// создаём объект для удаления кнопок у пользователя
+		removeKeyboard := &telego.ReplyKeyboardRemove{
+			RemoveKeyboard: true,
+		}
+
 		if msg.Text == "Да" {
-			text = "Спасибо! Онбординг завершен ✅\nВыберите действие через /start"
-			user.ConvState = StateDefault
-			user.Scenario = ScenarioNone
-		} else {
-			text = "Хорошо, давайте попробуем ещё раз. Введите почту:"
+			user.ConvState = StateWaitAdmin
+			text = "Спасибо! Отправил запрос администратору для подтверждения, ожидай ответа."
+
+			// Убираем кнопки у пользователя
+			_, _ = bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
+
+			// Отправляем админу заявку
+			adminChatID, err := strconv.ParseInt(config.AdminID, 10, 64)
+			if err != nil {
+				panic("неправильный adminChatID в конфиге: " + err.Error())
+			}
+
+			adminText := fmt.Sprintf(
+				"Пользователь @%s хочет пройти онбординг",
+				user.Username,
+			)
+
+			keyboard := &telego.InlineKeyboardMarkup{
+				InlineKeyboard: [][]telego.InlineKeyboardButton{
+					{
+						{Text: "✅ Подтвердить", CallbackData: "approve_" + strconv.FormatInt(msg.Chat.ID, 10)},
+						{Text: "❌ Отклонить", CallbackData: "reject_" + strconv.FormatInt(msg.Chat.ID, 10)},
+					},
+				},
+			}
+
+			_, _ = bot.SendMessage(ctx, tu.Message(tu.ID(adminChatID), adminText).WithReplyMarkup(keyboard))
+			return
+
+		} else if msg.Text == "Нет" {
+			// Пользователь сказал "Нет" → возвращаемся на ввод
 			user.Email = ""
 			user.Gmail = ""
 			user.ConvState = StateAskEmail
+			text = "Хорошо, давайте попробуем ещё раз. Введите почту:"
+
+			_, _ = bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
+			return
 		}
 	default:
 		panic("unhandled default case")

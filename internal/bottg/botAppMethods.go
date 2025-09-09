@@ -5,6 +5,8 @@ import (
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
+	"strconv"
+	"strings"
 )
 
 // HandleStart --- /start ---
@@ -46,12 +48,12 @@ func (app *BotApp) HandleCallback(ctx *th.Context, cq telego.CallbackQuery) erro
 	if cq.Message != nil && cq.Message.Message() != nil {
 		chatID = tu.ID(cq.Message.Message().Chat.ID)
 	} else {
-		// Сообщение недоступно
+		app.lock.Unlock()
 		return nil
 	}
 
-	switch cq.Data {
-	case "onboarding":
+	switch {
+	case cq.Data == "onboarding":
 		user.Scenario = ScenarioOnboarding
 		user.ConvState = StateAskEmail
 		app.users[userID] = user
@@ -61,20 +63,53 @@ func (app *BotApp) HandleCallback(ctx *th.Context, cq telego.CallbackQuery) erro
 			ctx,
 			tu.Message(chatID, fmt.Sprintf("Отлично, %s! Введи, пожалуйста, свою почту:", userName)),
 		)
-	case "info":
+
+	case cq.Data == "info":
 		user.Scenario = ScenarioInfo
 		user.ConvState = StateDefault
 		app.users[userID] = user
 		app.lock.Unlock()
 
-		_, _ = app.bot.SendMessage(
-			ctx,
-			tu.Message(chatID, "Какая-то инфа"),
-		)
-		_, _ = app.bot.SendMessage(
-			ctx,
-			tu.Message(chatID, "Выберите действие через /start"),
-		)
+		_, _ = app.bot.SendMessage(ctx, tu.Message(chatID, "Какая-то инфа"))
+		_, _ = app.bot.SendMessage(ctx, tu.Message(chatID, "Выберите действие через /start"))
+
+	case strings.HasPrefix(cq.Data, "approve_"):
+		app.lock.Unlock()
+		targetIDStr := strings.TrimPrefix(cq.Data, "approve_")
+		targetID, _ := strconv.ParseInt(targetIDStr, 10, 64)
+
+		// ✅ Убираем кнопки у сообщения админа
+		_, _ = app.bot.EditMessageReplyMarkup(ctx, &telego.EditMessageReplyMarkupParams{
+			ChatID:      chatID,
+			MessageID:   cq.Message.GetMessageID(),
+			ReplyMarkup: nil, // убираем клавиатуру
+		})
+
+		// уведомляем админа
+		_, _ = app.bot.SendMessage(ctx, tu.Message(chatID, "✅ Пользователь подтверждён."))
+
+		// уведомляем пользователя
+		_, _ = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "🎉 Твой онбординг подтверждён!"))
+		_, _ = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+
+	case strings.HasPrefix(cq.Data, "reject_"):
+		app.lock.Unlock()
+		targetIDStr := strings.TrimPrefix(cq.Data, "reject_")
+		targetID, _ := strconv.ParseInt(targetIDStr, 10, 64)
+
+		// ❌ Убираем кнопки у сообщения админа
+		_, _ = app.bot.EditMessageReplyMarkup(ctx, &telego.EditMessageReplyMarkupParams{
+			ChatID:      chatID,
+			MessageID:   cq.Message.GetMessageID(),
+			ReplyMarkup: nil,
+		})
+
+		// уведомляем админа
+		_, _ = app.bot.SendMessage(ctx, tu.Message(chatID, "❌ Пользователь отклонён."))
+
+		// уведомляем пользователя
+		_, _ = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "❌ Администратор отклонил онбординг."))
+		_, _ = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
 	default:
 		app.lock.Unlock()
 	}

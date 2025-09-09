@@ -15,6 +15,7 @@ const (
 	StateDefault ConvState = iota
 	StateAskEmail
 	StateConfirm
+	StateWaitAdmin
 )
 
 // Scenario --- Сценарии ---
@@ -28,6 +29,7 @@ const (
 
 // User --- Пользователь ---
 type User struct {
+	Username  string
 	Name      string
 	Scenario  Scenario
 	ConvState ConvState
