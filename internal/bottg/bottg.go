@@ -2,6 +2,7 @@ package bottg
 
 import (
 	"context"
+	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"sync"
 
 	"github.com/mymmrac/telego"
@@ -39,16 +40,20 @@ type User struct {
 
 // BotApp --- Приложение бота ---
 type BotApp struct {
-	bot   *telego.Bot
-	users map[int64]User
-	lock  sync.RWMutex
+	bot       *telego.Bot
+	users     map[int64]User
+	lock      sync.RWMutex
+	adminID   int64
+	onboarder app.Onboarder
 }
 
 // NewBotApp --- Конструктор ---
-func NewBotApp(bot *telego.Bot) *BotApp {
+func NewBotApp(bot *telego.Bot, onboarder app.Onboarder) *BotApp {
 	return &BotApp{
-		bot:   bot,
-		users: make(map[int64]User),
+		bot:       bot,
+		users:     make(map[int64]User),
+		adminID:   AdminIdParse(),
+		onboarder: onboarder,
 	}
 }
 
@@ -56,7 +61,6 @@ func NewBotApp(bot *telego.Bot) *BotApp {
 func (app *BotApp) Run(ctx context.Context) {
 	updates, _ := app.bot.UpdatesViaLongPolling(ctx, nil)
 	bh, _ := th.NewBotHandler(app.bot, updates)
-
 	// Привязка методов
 	bh.Handle(app.HandleStart, th.CommandEqual("start"))
 	bh.HandleCallbackQuery(app.HandleCallback)
