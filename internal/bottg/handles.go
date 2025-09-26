@@ -12,14 +12,13 @@ import (
 )
 
 // --- Обработка сценария Onboarding ---
-func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *User) {
+func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *User) error {
 	var text string
-
 	switch user.ConvState {
 	case StateAskEmail:
-		addr, err := mail.ParseAddress(msg.Text)
+		addr, uncorrectEmail := mail.ParseAddress(msg.Text)
 		user.Username = msg.From.Username
-		if err != nil {
+		if uncorrectEmail != nil {
 			text = "Неправильный формат почты, попробуйте ещё раз."
 		} else if strings.HasSuffix(addr.Address, "@gmail.com") {
 			user.Gmail = addr.Address
@@ -33,12 +32,15 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 				ResizeKeyboard:  true,
 				OneTimeKeyboard: true,
 			}
-			app.safeSend(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(keyboard))
+			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(keyboard))
+			if err != nil {
+				return err
+			}
 			if user.Email == "" {
 				user.Email = addr.Address
 			}
 			log.Printf("Got %s: Email: %s, Gmail: %s", user.Name, user.Email, user.Gmail)
-			return
+			return nil
 		} else {
 			if user.Email == "" {
 				user.Email = addr.Address
@@ -57,7 +59,10 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			text = "Спасибо! Отправил запрос администратору для подтверждения, ожидай ответа."
 
 			// Убираем кнопки у пользователя
-			app.safeSend(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
+			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
+			if err != nil {
+				return err
+			}
 			// Отправляем админу заявку
 
 			adminText := fmt.Sprintf(
@@ -74,8 +79,11 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 				},
 			}
 
-			app.safeSend(ctx, tu.Message(tu.ID(app.adminID), adminText).WithReplyMarkup(keyboard))
-			return
+			_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(app.adminID), adminText).WithReplyMarkup(keyboard))
+			if err != nil {
+				return err
+			}
+			return nil
 
 		} else if msg.Text == "Нет" {
 			// Пользователь сказал "Нет" → возвращаемся на ввод
@@ -84,15 +92,21 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			user.ConvState = StateAskEmail
 			text = "Хорошо, давайте попробуем ещё раз. Введите почту:"
 
-			app.safeSend(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
-			return
+			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 	default:
 		panic("unhandled default case")
 	}
 
-	app.safeSend(ctx, tu.Message(msg.Chat.ChatID(), text))
-
+	_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // --- Обработка сценария Info ---

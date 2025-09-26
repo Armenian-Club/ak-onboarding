@@ -34,6 +34,8 @@ func main() {
 		log.Fatal(err)
 	}
 	appBot := bottg.NewBotApp(bot, onboarder)
-	appBot.Run(ctx)
-
+	err = appBot.Run(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

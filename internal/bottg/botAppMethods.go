@@ -27,10 +27,11 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 			},
 		},
 	}
-
-	app.safeSend(ctx, tu.Message(update.Message.Chat.ChatID(),
+	_, err := app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(),
 		"Привет, "+userName+" 👋! Выберите действие:").WithReplyMarkup(keyboard))
-
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -60,13 +61,25 @@ func (app *BotApp) HandleCallback(ctx *th.Context, cq telego.CallbackQuery) erro
 	// Обрабатываем callback
 	switch {
 	case cq.Data == "onboarding":
-		app.caseOnbording(ctx, user, userID, chatID, userName)
+		err := app.caseOnbording(ctx, user, userID, chatID, userName)
+		if err != nil {
+			return err
+		}
 	case cq.Data == "info":
-		app.caseInfo(ctx, user, userID, chatID)
+		err := app.caseInfo(ctx, user, userID, chatID)
+		if err != nil {
+			return err
+		}
 	case strings.HasPrefix(cq.Data, "approve_"):
-		app.caseApprove(ctx, cq, chatID)
+		err := app.caseApprove(ctx, cq, chatID)
+		if err != nil {
+			return err
+		}
 	case strings.HasPrefix(cq.Data, "reject_"):
-		app.caseReject(ctx, cq, chatID)
+		err := app.caseReject(ctx, cq, chatID)
+		if err != nil {
+			return err
+		}
 	default:
 		log.Printf("⚠️ Неизвестный callback: %s", cq.Data)
 	}
@@ -97,11 +110,17 @@ func (app *BotApp) HandleMessage(ctx *th.Context, msg telego.Message) error {
 
 	switch user.Scenario {
 	case ScenarioOnboarding:
-		app.handleOnboarding(ctx, msg, &user)
+		err := app.handleOnboarding(ctx, msg, &user)
+		if err != nil {
+			return err
+		}
 	case ScenarioInfo:
 		app.handleInfo(ctx, msg, app.bot, &user)
 	default:
-		app.safeSend(ctx, tu.Message(msg.Chat.ChatID(), "Выберите действие через /start"))
+		_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), "Выберите действие через /start"))
+		if err != nil {
+			return err
+		}
 	}
 	// Обновляем пользователя в map после изменения состояния
 	app.lock.Lock()
@@ -113,24 +132,16 @@ func (app *BotApp) HandleMessage(ctx *th.Context, msg telego.Message) error {
 
 // --- Вспомогательные функции ---
 
-// безопасная отправка сообщений
-func (app *BotApp) safeSend(ctx *th.Context, msg *telego.SendMessageParams) {
-	_, err := app.bot.SendMessage(ctx, msg)
-	if err != nil {
-		log.Printf("Ошибка при отправке сообщения (%v): %v", msg.Text, err)
-	}
-}
-
-// безопасное редактирование разметки (убираем кнопки)
-func (app *BotApp) safeEditMarkup(ctx *th.Context, chatID telego.ChatID, msgID int, markup *telego.InlineKeyboardMarkup) {
+func (app *BotApp) safeEditMarkup(ctx *th.Context, chatID telego.ChatID, msgID int, markup *telego.InlineKeyboardMarkup) error {
 	_, err := app.bot.EditMessageReplyMarkup(ctx, &telego.EditMessageReplyMarkupParams{
 		ChatID:      chatID,
 		MessageID:   msgID,
 		ReplyMarkup: markup,
 	})
 	if err != nil {
-		log.Printf("Ошибка при редактировании клавиатуры: %v", err)
+		return err
 	}
+	return nil
 }
 
 // сброс состояния пользователя (после завершения онбординга)
@@ -143,7 +154,7 @@ func (app *BotApp) resetUser(userID int64) {
 
 // --- Callback кейсы ---
 
-func (app *BotApp) caseOnbording(ctx *th.Context, user User, userID int64, chatID telego.ChatID, userName string) {
+func (app *BotApp) caseOnbording(ctx *th.Context, user User, userID int64, chatID telego.ChatID, userName string) error {
 	user.Scenario = ScenarioOnboarding
 	user.ConvState = StateAskEmail
 
@@ -151,10 +162,14 @@ func (app *BotApp) caseOnbording(ctx *th.Context, user User, userID int64, chatI
 	app.users[userID] = user
 	app.lock.Unlock()
 
-	app.safeSend(ctx, tu.Message(chatID, fmt.Sprintf("Отлично, %s! Введи, пожалуйста, свою почту:", userName)))
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, fmt.Sprintf("Отлично, %s! Введи, пожалуйста, свою почту:", userName)))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (app *BotApp) caseInfo(ctx *th.Context, user User, userID int64, chatID telego.ChatID) {
+func (app *BotApp) caseInfo(ctx *th.Context, user User, userID int64, chatID telego.ChatID) error {
 	user.Scenario = ScenarioInfo
 	user.ConvState = StateDefault
 
@@ -162,69 +177,96 @@ func (app *BotApp) caseInfo(ctx *th.Context, user User, userID int64, chatID tel
 	app.users[userID] = user
 	app.lock.Unlock()
 
-	app.safeSend(ctx, tu.Message(chatID, "Какая-то инфа"))
-	app.safeSend(ctx, tu.Message(chatID, "Выберите действие через /start"))
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, "Какая-то инфа"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Выберите действие через /start"))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID telego.ChatID) {
+func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID telego.ChatID) error {
 	targetIDStr := strings.TrimPrefix(cq.Data, "approve_")
 	targetID, err := strconv.ParseInt(targetIDStr, 10, 64)
 	if err != nil {
-		log.Println("❌ Ошибка парсинга ID в approve:", err)
-		return
+		return err
 	}
 
 	// ✅ убираем кнопки у сообщения админа
 	if cq.Message != nil {
-		app.safeEditMarkup(ctx, chatID, cq.Message.GetMessageID(), nil)
+		err = app.safeEditMarkup(ctx, chatID, cq.Message.GetMessageID(), nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	// уведомляем админа
-	app.safeSend(ctx, tu.Message(chatID, "✅ Пользователь подтверждён."))
-
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "✅ Пользователь подтверждён."))
+	if err != nil {
+		return err
+	}
 	//ONBOARDING
 	err = app.onboarder.Onboard(ctx, app.users[targetID].Email, app.users[targetID].Gmail)
 	if err != nil {
-		log.Fatal("Ошибка онбординга: " + err.Error())
+		return err
 	}
 
 	// уведомляем пользователя
-	app.safeSend(ctx, tu.Message(tu.ID(targetID), "🎉 Твой онбординг подтверждён!"))
-	app.safeSend(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
-
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "🎉 Твой онбординг подтверждён!"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+	if err != nil {
+		return err
+	}
 	// ❗ удаляем юзера
 	app.resetUser(targetID)
+	return nil
 }
 
-func (app *BotApp) caseReject(ctx *th.Context, cq telego.CallbackQuery, chatID telego.ChatID) {
+func (app *BotApp) caseReject(ctx *th.Context, cq telego.CallbackQuery, chatID telego.ChatID) error {
 	targetIDStr := strings.TrimPrefix(cq.Data, "reject_")
 	targetID, err := strconv.ParseInt(targetIDStr, 10, 64)
 	if err != nil {
-		log.Println("❌ Ошибка парсинга ID в reject:", err)
-		return
+		return err
 	}
 
 	// ❌ убираем кнопки у сообщения админа
 	if cq.Message != nil {
-		app.safeEditMarkup(ctx, chatID, cq.Message.GetMessageID(), nil)
+		err = app.safeEditMarkup(ctx, chatID, cq.Message.GetMessageID(), nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	// уведомляем админа
-	app.safeSend(ctx, tu.Message(chatID, "❌ Пользователь отклонён."))
-
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "❌ Пользователь отклонён."))
+	if err != nil {
+		return err
+	}
 	// уведомляем пользователя
-	app.safeSend(ctx, tu.Message(tu.ID(targetID), "❌ Администратор отклонил онбординг."))
-	app.safeSend(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "❌ Администратор отклонил онбординг."))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+	if err != nil {
+		return err
+	}
 
 	// ❗ удаляем юзера
 	app.resetUser(targetID)
-
+	return nil
 }
 
 func AdminIdParse() int64 {
 	adminIdInt, err := strconv.ParseInt(config.AdminID, 10, 64)
 	if err != nil {
-		log.Fatal("Неправильный adminChatID в конфиге: " + err.Error())
+		panic(err)
 	}
 	return adminIdInt
 }
