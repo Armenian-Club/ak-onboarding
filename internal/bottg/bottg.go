@@ -2,28 +2,80 @@ package bottg
 
 import (
 	"context"
+	"github.com/Armenian-Club/ak-onboarding/internal/app"
+	"sync"
+
 	"github.com/mymmrac/telego"
-	tu "github.com/mymmrac/telego/telegoutil"
+	th "github.com/mymmrac/telego/telegohandler"
 )
 
-func Run(ctx context.Context, bot *telego.Bot) {
+// ConvState --- Состояния внутри сценария ---
+type ConvState uint
 
-	updates, _ := bot.UpdatesViaLongPolling(ctx, nil)
+const (
+	StateDefault ConvState = iota
+	StateAskEmail
+	StateConfirm
+	StateWaitAdmin
+)
 
-	for update := range updates {
-		if update.Message != nil {
-			chatID := tu.ID(update.Message.Chat.ID)
-			keyboard := tu.Keyboard(
-				tu.KeyboardRow(
-					tu.KeyboardButton("Старт"),
-					tu.KeyboardButton("Отправить на подтверждение"),
-				),
-			)
-			message := tu.Message(
-				chatID,
-				"Hello Bro",
-			).WithReplyMarkup(keyboard)
-			_, _ = bot.SendMessage(ctx, message)
-		}
+// Scenario --- Сценарии ---
+type Scenario string
+
+const (
+	ScenarioNone       Scenario = ""
+	ScenarioOnboarding Scenario = "onboarding"
+	ScenarioInfo       Scenario = "info"
+)
+
+// User --- Пользователь ---
+type User struct {
+	Username  string
+	Name      string
+	Scenario  Scenario
+	ConvState ConvState
+	Email     string
+	Gmail     string
+}
+
+// BotApp --- Приложение бота ---
+type BotApp struct {
+	bot       *telego.Bot
+	users     map[int64]User
+	lock      sync.RWMutex
+	adminID   int64
+	onboarder app.Onboarder
+}
+
+// NewBotApp --- Конструктор ---
+func NewBotApp(bot *telego.Bot, onboarder app.Onboarder) *BotApp {
+	return &BotApp{
+		bot:       bot,
+		users:     make(map[int64]User),
+		adminID:   AdminIdParse(),
+		onboarder: onboarder,
 	}
+}
+
+// Run --- Запуск приложения ---
+func (app *BotApp) Run(ctx context.Context) error {
+	updates, err := app.bot.UpdatesViaLongPolling(ctx, nil)
+	if err != nil {
+		return err
+	}
+	bh, err := th.NewBotHandler(app.bot, updates)
+	if err != nil {
+		return err
+	}
+	// Привязка методов
+	bh.Handle(app.HandleStart, th.CommandEqual("start"))
+	bh.HandleCallbackQuery(app.HandleCallback)
+	bh.HandleMessage(app.HandleMessage)
+
+	defer func() { _ = bh.Stop() }()
+	err = bh.Start()
+	if err != nil {
+		return err
+	}
+	return nil
 }
