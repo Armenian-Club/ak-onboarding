@@ -23,12 +23,16 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 		InlineKeyboard: [][]telego.InlineKeyboardButton{
 			{
 				{Text: "Пройти онбординг", CallbackData: "onboarding"},
-				{Text: "Информация", CallbackData: "info"},
+				{Text: "Инструкции", CallbackData: "info"},
 			},
 		},
 	}
 	_, err := app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(),
 		"Привет, "+userName+" 👋! Выберите действие:").WithReplyMarkup(keyboard))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), "При возникновении ошибок работы бота напиши пожалуйста @gevorg_tsat"))
 	if err != nil {
 		return err
 	}
@@ -114,8 +118,6 @@ func (app *BotApp) HandleMessage(ctx *th.Context, msg telego.Message) error {
 		if err != nil {
 			return err
 		}
-	case ScenarioInfo:
-		app.handleInfo(ctx, msg, app.bot, &user)
 	default:
 		_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), "Выберите действие через /start"))
 		if err != nil {
@@ -170,14 +172,22 @@ func (app *BotApp) caseOnbording(ctx *th.Context, user User, userID int64, chatI
 }
 
 func (app *BotApp) caseInfo(ctx *th.Context, user User, userID int64, chatID telego.ChatID) error {
-	user.Scenario = ScenarioInfo
+	user.Scenario = ScenarioNone
 	user.ConvState = StateDefault
 
 	app.lock.Lock()
 	app.users[userID] = user
 	app.lock.Unlock()
 
-	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, "Какая-то инфа"))
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, "Инструкции для настройки сервисов:"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22"))
 	if err != nil {
 		return err
 	}
@@ -216,6 +226,18 @@ func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID 
 
 	// уведомляем пользователя
 	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "🎉 Твой онбординг подтверждён!"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Проверь пожалуйста почту, тебе должно прийти два письма с приглашениями. Если ничего не пришло или пришло одно письмо, проверь пожалуйста Спам."))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Инструкция для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Инструкция настройки для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22"))
 	if err != nil {
 		return err
 	}
