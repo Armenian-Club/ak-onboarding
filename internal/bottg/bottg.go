@@ -25,7 +25,6 @@ type Scenario string
 const (
 	ScenarioNone       Scenario = ""
 	ScenarioOnboarding Scenario = "onboarding"
-	ScenarioInfo       Scenario = "info"
 )
 
 // User --- Пользователь ---

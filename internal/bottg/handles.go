@@ -110,10 +110,21 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 }
 
 // --- Обработка сценария Info ---
-func (app *BotApp) handleInfo(ctx *th.Context, msg telego.Message, bot *telego.Bot, user *User) {
-
-	//тут можно задать любые действия, но тут пока пусто
-
+func (app *BotApp) handleInfo(ctx *th.Context, msg telego.Message, user *User) error {
+	chatID := msg.Chat.ChatID()
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, "Для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22"))
+	if err != nil {
+		return err
+	}
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Выберите действие через /start"))
+	if err != nil {
+		return err
+	}
 	user.Scenario = ScenarioNone
 	user.ConvState = StateDefault
+	return nil
 }
