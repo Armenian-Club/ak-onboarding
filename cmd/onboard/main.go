@@ -29,7 +29,7 @@ func main() {
 	onboarder := app.New(mmClient, calendarClient, driveClient)
 	defer cancel()
 	botToken := config.BotToken
-	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
+	bot, err := telego.NewBot(botToken)
 	if err != nil {
 		log.Fatal(err)
 	}
