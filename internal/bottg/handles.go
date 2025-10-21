@@ -2,13 +2,14 @@ package bottg
 
 import (
 	"fmt"
-	"github.com/mymmrac/telego"
-	th "github.com/mymmrac/telego/telegohandler"
-	tu "github.com/mymmrac/telego/telegoutil"
 	"log"
 	"net/mail"
 	"strconv"
 	"strings"
+
+	"github.com/mymmrac/telego"
+	th "github.com/mymmrac/telego/telegohandler"
+	tu "github.com/mymmrac/telego/telegoutil"
 )
 
 // --- Обработка сценария Onboarding ---

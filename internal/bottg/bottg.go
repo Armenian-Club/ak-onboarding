@@ -2,8 +2,9 @@ package bottg
 
 import (
 	"context"
-	"github.com/Armenian-Club/ak-onboarding/internal/app"
 	"sync"
+
+	"github.com/Armenian-Club/ak-onboarding/internal/app"
 
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"

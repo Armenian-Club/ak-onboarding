@@ -2,13 +2,14 @@ package bottg
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
-	"log"
-	"strconv"
-	"strings"
 )
 
 func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
@@ -33,10 +34,7 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 		return err
 	}
 	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), supportText))
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // HandleCallback --- обработка CallbackQuery
