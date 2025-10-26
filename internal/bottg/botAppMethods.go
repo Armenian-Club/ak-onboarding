@@ -2,13 +2,14 @@ package bottg
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/Armenian-Club/ak-onboarding/internal/config"
 	"github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
-	"log"
-	"strconv"
-	"strings"
 )
 
 func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
@@ -32,11 +33,8 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), "При возникновении ошибок работы бота напиши пожалуйста @gevorg_tsat"))
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), supportText))
+	return err
 }
 
 // HandleCallback --- обработка CallbackQuery
@@ -119,7 +117,7 @@ func (app *BotApp) HandleMessage(ctx *th.Context, msg telego.Message) error {
 			return err
 		}
 	default:
-		_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), "Выберите действие через /start"))
+		_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), chooseActionText))
 		if err != nil {
 			return err
 		}
@@ -164,7 +162,7 @@ func (app *BotApp) caseOnbording(ctx *th.Context, user User, userID int64, chatI
 	app.users[userID] = user
 	app.lock.Unlock()
 
-	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, fmt.Sprintf("Отлично, %s! Введи, пожалуйста, свою почту:", userName)))
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, fmt.Sprintf(getEmailText, userName)))
 	if err != nil {
 		return err
 	}
@@ -214,7 +212,7 @@ func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID 
 	}
 
 	// уведомляем админа
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "✅ Пользователь подтверждён."))
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, adminApprovedUserText))
 	if err != nil {
 		return err
 	}
@@ -225,23 +223,23 @@ func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID 
 	}
 
 	// уведомляем пользователя
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "🎉 Твой онбординг подтверждён!"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), userOnboardApproveText))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Проверь пожалуйста почту, тебе должно прийти два письма с приглашениями. Если ничего не пришло или пришло одно письмо, проверь пожалуйста Спам."))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), checkEmailText))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Инструкция для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForMM))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Инструкция настройки для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForGD))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), chooseActionText))
 	if err != nil {
 		return err
 	}
@@ -266,16 +264,16 @@ func (app *BotApp) caseReject(ctx *th.Context, cq telego.CallbackQuery, chatID t
 	}
 
 	// уведомляем админа
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "❌ Пользователь отклонён."))
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, adminRejectUserText))
 	if err != nil {
 		return err
 	}
 	// уведомляем пользователя
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "❌ Администратор отклонил онбординг."))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), userOnboardRejectText))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), "Выберите действие через /start"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), chooseActionText))
 	if err != nil {
 		return err
 	}

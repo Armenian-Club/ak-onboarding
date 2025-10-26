@@ -2,13 +2,14 @@ package bottg
 
 import (
 	"fmt"
-	"github.com/mymmrac/telego"
-	th "github.com/mymmrac/telego/telegohandler"
-	tu "github.com/mymmrac/telego/telegoutil"
 	"log"
 	"net/mail"
 	"strconv"
 	"strings"
+
+	"github.com/mymmrac/telego"
+	th "github.com/mymmrac/telego/telegohandler"
+	tu "github.com/mymmrac/telego/telegoutil"
 )
 
 // --- Обработка сценария Onboarding ---
@@ -19,11 +20,11 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 		addr, uncorrectEmail := mail.ParseAddress(msg.Text)
 		user.Username = msg.From.Username
 		if uncorrectEmail != nil {
-			text = "Неправильный формат почты, попробуйте ещё раз."
+			text = incorrectEmailText
 		} else if strings.HasSuffix(addr.Address, "@gmail.com") {
 			user.Gmail = addr.Address
 			user.ConvState = StateConfirm
-			text = fmt.Sprintf("Вы указали почту(ы): %s %s. Верно? (Да/Нет)", user.Email, user.Gmail)
+			text = fmt.Sprintf(emailCheckText, user.Email, user.Gmail)
 
 			keyboard := &telego.ReplyKeyboardMarkup{
 				Keyboard: [][]telego.KeyboardButton{
@@ -66,7 +67,7 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			// Отправляем админу заявку
 
 			adminText := fmt.Sprintf(
-				"Пользователь @%s хочет пройти онбординг",
+				userWantOnboardText,
 				user.Username,
 			)
 
@@ -112,15 +113,15 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 // --- Обработка сценария Info ---
 func (app *BotApp) handleInfo(ctx *th.Context, msg telego.Message, user *User) error {
 	chatID := msg.Chat.ChatID()
-	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, "Для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558"))
+	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, instructionsForMM))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, instructionsForGD))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, "Выберите действие через /start"))
+	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, chooseActionText))
 	if err != nil {
 		return err
 	}
