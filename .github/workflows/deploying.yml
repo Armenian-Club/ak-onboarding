@@ -18,7 +18,18 @@ jobs:
           go-version: '1.24'
 
       - name: Build
-        run: GOOS=linux GOARCH=amd64 go build -o onboard ./cmd/onboard/*.go
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o onboard ./cmd/onboard/*.go
+
+
+      - name: Stop service via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            sudo systemctl stop onboard-bot
 
       - name: Copy file via SSH
         uses: appleboy/scp-action@v0.1.7
@@ -30,7 +41,7 @@ jobs:
           source: "onboard"
           target: "/opt/onboard-bot/"
 
-      - name: Restart service via SSH
+      - name: Start service via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -38,4 +49,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            sudo systemctl restart onboard-bot
+            sudo systemctl start onboard-bot
