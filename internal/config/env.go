@@ -15,6 +15,7 @@ var (
 	FolderID         string
 	BotToken         string
 	AdminID          string
+	AdminTag         string
 )
 
 func init() {
@@ -28,4 +29,5 @@ func init() {
 	FolderID = os.Getenv("FOLDER_ID")
 	BotToken = os.Getenv("BOT_TOKEN")
 	AdminID = os.Getenv("ADMIN_ID")
+	AdminTag = os.Getenv("ADMIN_TAG")
 }

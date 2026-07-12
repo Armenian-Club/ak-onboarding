@@ -33,7 +33,7 @@ func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), supportText))
+	_, err = app.bot.SendMessage(ctx, tu.Message(update.Message.Chat.ChatID(), supportText+config.AdminTag))
 	return err
 }
 
