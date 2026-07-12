@@ -1,6 +1,6 @@
 package bottg
 
-const supportText = "При возникновении ошибок в работе бота, пожалуйста, напиши @gevorg_tsat."
+const supportText = "При возникновении ошибок в работе бота, пожалуйста, напиши "
 
 const chooseActionText = "Выберите действие через /start"
 
