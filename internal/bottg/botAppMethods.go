@@ -13,7 +13,9 @@ import (
 )
 
 func (app *BotApp) HandleStart(ctx *th.Context, update telego.Update) error {
+
 	userID := update.Message.From.ID
+
 	userName := update.Message.From.FirstName
 
 	app.lock.Lock()

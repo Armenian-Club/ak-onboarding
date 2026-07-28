@@ -31,6 +31,7 @@ func NewClient(ctx context.Context, jsonCreds []byte, opts ...option.ClientOptio
 	baseOpts := []option.ClientOption{
 		option.WithCredentials(creds),
 	}
+
 	baseOpts = append(baseOpts, opts...)
 
 	srv, err := calendar.NewService(ctx, baseOpts...)

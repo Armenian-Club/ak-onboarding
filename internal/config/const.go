@@ -1,5 +1,3 @@
 package config
 
-const (
-	GoogleCredsPath = "./secrets/ak-drive-creds.json"
-)
+const GoogleCredsPath = "./secrets/ak-drive-creds.json"

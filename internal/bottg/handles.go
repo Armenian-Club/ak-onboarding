@@ -62,6 +62,7 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 
 		if msg.Text == "Да" {
 			user.ConvState = StateWaitAdmin
+
 			text = "Спасибо! Отправил запрос администратору для подтверждения, ожидай ответа."
 
 			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))

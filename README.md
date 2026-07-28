@@ -10,6 +10,12 @@ MM_ARMENIAN_CLUB_ID=example
 MM_BASIC_URL=example
 MM_BOT_ACCESS_TOKEN=example
 FOLDER_ID=your_gdrive_folder_id
+BOT_TOKEN=example
+ADMIN_ID=admin_telegram_chat_id
+SYSADMIN_TAG=sysadmin_telegram_tag
+CALENDAR_ID=google_calendar_id
+
+
 ```
 - build and run project
 ```bash

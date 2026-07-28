@@ -19,6 +19,7 @@ func (c *client) InviteUser(ctx context.Context, gmail string) error {
 	if err != nil {
 		return fmt.Errorf("service account %q has no access to calendar %q: %w", "gdrive@ak-onboarding.iam.gserviceaccount.com", c.calendarID, err)
 	}
+
 	_, err = c.srv.Acl.Insert(c.calendarID, rule).
 		SendNotifications(true).
 		Context(ctx).

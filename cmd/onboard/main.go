@@ -24,10 +24,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create calendar client: %v", err)
 	}
+
 	driveClient, err := drive.NewClient(ctx, jsonCreds)
 	if err != nil {
 		log.Fatalf("Failed to create drive client: %v", err)
 	}
+
 	onboarder := app.New(mmClient, calendarClient, driveClient)
 	defer cancel()
 	botToken := config.BotToken
