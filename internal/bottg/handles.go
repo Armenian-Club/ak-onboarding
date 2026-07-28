@@ -15,14 +15,21 @@ import (
 // --- Обработка сценария Onboarding ---
 func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *User) error {
 	var text string
+
 	switch user.ConvState {
 	case StateAskEmail:
-		addr, uncorrectEmail := mail.ParseAddress(msg.Text)
+		addr, err := mail.ParseAddress(msg.Text)
 		user.Username = msg.From.Username
-		if uncorrectEmail != nil {
+
+		if err != nil {
 			text = incorrectEmailText
 		} else if strings.HasSuffix(addr.Address, "@gmail.com") {
 			user.Gmail = addr.Address
+
+			if user.Email == "" {
+				user.Email = addr.Address
+			}
+
 			user.ConvState = StateConfirm
 			text = fmt.Sprintf(emailCheckText, user.Email, user.Gmail)
 
@@ -33,13 +40,12 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 				ResizeKeyboard:  true,
 				OneTimeKeyboard: true,
 			}
+
 			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(keyboard))
 			if err != nil {
 				return err
 			}
-			if user.Email == "" {
-				user.Email = addr.Address
-			}
+
 			log.Printf("Got %s: Email: %s, Gmail: %s", user.Name, user.Email, user.Gmail)
 			return nil
 		} else {
@@ -50,7 +56,6 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 		}
 
 	case StateConfirm:
-		// создаём объект для удаления кнопок у пользователя
 		removeKeyboard := &telego.ReplyKeyboardRemove{
 			RemoveKeyboard: true,
 		}
@@ -59,17 +64,12 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			user.ConvState = StateWaitAdmin
 			text = "Спасибо! Отправил запрос администратору для подтверждения, ожидай ответа."
 
-			// Убираем кнопки у пользователя
 			_, err := app.bot.SendMessage(ctx, tu.Message(msg.Chat.ChatID(), text).WithReplyMarkup(removeKeyboard))
 			if err != nil {
 				return err
 			}
-			// Отправляем админу заявку
 
-			adminText := fmt.Sprintf(
-				userWantOnboardText,
-				user.Username,
-			)
+			adminText := fmt.Sprintf(userWantOnboardText, user.Username)
 
 			keyboard := &telego.InlineKeyboardMarkup{
 				InlineKeyboard: [][]telego.InlineKeyboardButton{
@@ -84,10 +84,11 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			if err != nil {
 				return err
 			}
-			return nil
 
-		} else if msg.Text == "Нет" {
-			// Пользователь сказал "Нет" → возвращаемся на ввод
+			return nil
+		}
+
+		if msg.Text == "Нет" {
 			user.Email = ""
 			user.Gmail = ""
 			user.ConvState = StateAskEmail
@@ -97,8 +98,12 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 			if err != nil {
 				return err
 			}
+
 			return nil
 		}
+
+		text = "Пожалуйста, выберите: Да или Нет."
+
 	default:
 		panic("unhandled default case")
 	}
@@ -107,25 +112,6 @@ func (app *BotApp) handleOnboarding(ctx *th.Context, msg telego.Message, user *U
 	if err != nil {
 		return err
 	}
-	return nil
-}
 
-// --- Обработка сценария Info ---
-func (app *BotApp) handleInfo(ctx *th.Context, msg telego.Message, user *User) error {
-	chatID := msg.Chat.ChatID()
-	_, err := app.bot.SendMessage(ctx, tu.Message(chatID, instructionsForMM))
-	if err != nil {
-		return err
-	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, instructionsForGD))
-	if err != nil {
-		return err
-	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(chatID, chooseActionText))
-	if err != nil {
-		return err
-	}
-	user.Scenario = ScenarioNone
-	user.ConvState = StateDefault
 	return nil
 }

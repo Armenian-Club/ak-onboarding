@@ -16,6 +16,7 @@ var (
 	BotToken         string
 	AdminID          string
 	SysadminTag      string
+	CalendarID       string
 )
 
 func init() {
@@ -30,4 +31,5 @@ func init() {
 	BotToken = os.Getenv("BOT_TOKEN")
 	AdminID = os.Getenv("ADMIN_ID")
 	SysadminTag = os.Getenv("SYSADMIN_TAG")
+	CalendarID = os.Getenv("CALENDAR_ID")
 }
