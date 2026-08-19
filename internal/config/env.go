@@ -10,13 +10,16 @@ var (
 	// MMArmenianClubId The id of our team
 	MMArmenianClubId string
 	// MMBasicUrl Basic url of queries
-	MMBasicUrl       string
-	MMBotAccessToken string
-	FolderID         string
-	BotToken         string
-	AdminID          string
-	SysadminTag      string
-	CalendarID       string
+	MMBasicUrl                 string
+	MMBotAccessToken           string
+	FolderID                   string
+	BotToken                   string
+	AdminID                    string
+	SysadminTag                string
+	CalendarID                 string
+	StartInfoPageURL           string
+	MattermostInstructionsURL  string
+	GoogleDriveInstructionsURL string
 )
 
 func init() {
@@ -33,4 +36,7 @@ func init() {
 	AdminID = os.Getenv("ADMIN_ID")
 	SysadminTag = os.Getenv("SYSADMIN_TAG")
 	CalendarID = os.Getenv("CALENDAR_ID")
+	StartInfoPageURL = os.Getenv("START_INFO_PAGE_URL")
+	MattermostInstructionsURL = os.Getenv("MATTERMOST_INSTRUCTIONS_URL")
+	GoogleDriveInstructionsURL = os.Getenv("GOOGLE_DRIVE_INSTRUCTIONS_URL")
 }

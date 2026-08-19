@@ -152,10 +152,10 @@ func (app *BotApp) safeEditMarkup(ctx *th.Context, chatID telego.ChatID, msgID i
 
 func (app *BotApp) sendInfoMessages(ctx *th.Context, chatID telego.ChatID) error {
 	messages := []string{
-		startInfoPage,
+		startInfoPagePrefix + config.StartInfoPageURL,
 		"Инструкции для настройки сервисов:",
-		"Для настройки Mattermost: https://outline.armenianclub.org/s/9814ee83-3a0e-4e7d-872f-c767d2216558",
-		"Для Google Drive: https://outline.armenianclub.org/s/30b3026a-b656-4b1f-9415-d775effdcf22",
+		instructionsForMMPrefix + config.MattermostInstructionsURL,
+		instructionsForGDPrefix + config.GoogleDriveInstructionsURL,
 		chooseActionText,
 	}
 
@@ -242,7 +242,7 @@ func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID 
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), startInfoPage))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), startInfoPagePrefix+config.StartInfoPageURL))
 	if err != nil {
 		return err
 	}
@@ -250,11 +250,11 @@ func (app *BotApp) caseApprove(ctx *th.Context, cq telego.CallbackQuery, chatID 
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForMM))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForMMPrefix+config.MattermostInstructionsURL))
 	if err != nil {
 		return err
 	}
-	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForGD))
+	_, err = app.bot.SendMessage(ctx, tu.Message(tu.ID(targetID), instructionsForGDPrefix+config.GoogleDriveInstructionsURL))
 	if err != nil {
 		return err
 	}
