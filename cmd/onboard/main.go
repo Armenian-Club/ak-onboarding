@@ -20,12 +20,16 @@ func main() {
 		log.Fatalf("Failed to read from json creds file drive client: %v", err)
 	}
 	mmClient := mm.NewClient()
-	calendarClient := calendar.NewClient()
-	driveClient, err := drive.NewClient(ctx, jsonCreds)
+	calendarClient, err := calendar.NewClient(ctx, jsonCreds)
+	if err != nil {
+		log.Fatalf("Failed to create calendar client: %v", err)
+	}
 
+	driveClient, err := drive.NewClient(ctx, jsonCreds)
 	if err != nil {
 		log.Fatalf("Failed to create drive client: %v", err)
 	}
+
 	onboarder := app.New(mmClient, calendarClient, driveClient)
 	defer cancel()
 	botToken := config.BotToken

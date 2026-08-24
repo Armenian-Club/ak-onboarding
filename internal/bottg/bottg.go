@@ -59,14 +59,17 @@ func NewBotApp(bot *telego.Bot, onboarder app.Onboarder) *BotApp {
 
 // Run --- Запуск приложения ---
 func (app *BotApp) Run(ctx context.Context) error {
+
 	updates, err := app.bot.UpdatesViaLongPolling(ctx, nil)
 	if err != nil {
 		return err
 	}
+
 	bh, err := th.NewBotHandler(app.bot, updates)
 	if err != nil {
 		return err
 	}
+
 	// Привязка методов
 	bh.Handle(app.HandleStart, th.CommandEqual("start"))
 	bh.HandleCallbackQuery(app.HandleCallback)

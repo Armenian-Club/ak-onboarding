@@ -10,12 +10,16 @@ var (
 	// MMArmenianClubId The id of our team
 	MMArmenianClubId string
 	// MMBasicUrl Basic url of queries
-	MMBasicUrl       string
-	MMBotAccessToken string
-	FolderID         string
-	BotToken         string
-	AdminID          string
-	SysadminTag      string
+	MMBasicUrl                 string
+	MMBotAccessToken           string
+	FolderID                   string
+	BotToken                   string
+	AdminID                    string
+	SysadminTag                string
+	CalendarID                 string
+	StartInfoPageURL           string
+	MattermostInstructionsURL  string
+	GoogleDriveInstructionsURL string
 )
 
 func init() {
@@ -23,6 +27,7 @@ func init() {
 	if err != nil {
 		slog.Error("Error loading .env file", "error", err)
 	}
+
 	MMArmenianClubId = os.Getenv("MM_ARMENIAN_CLUB_ID")
 	MMBasicUrl = os.Getenv("MM_BASIC_URL")
 	MMBotAccessToken = os.Getenv("MM_BOT_ACCESS_TOKEN")
@@ -30,4 +35,8 @@ func init() {
 	BotToken = os.Getenv("BOT_TOKEN")
 	AdminID = os.Getenv("ADMIN_ID")
 	SysadminTag = os.Getenv("SYSADMIN_TAG")
+	CalendarID = os.Getenv("CALENDAR_ID")
+	StartInfoPageURL = os.Getenv("START_INFO_PAGE_URL")
+	MattermostInstructionsURL = os.Getenv("MATTERMOST_INSTRUCTIONS_URL")
+	GoogleDriveInstructionsURL = os.Getenv("GOOGLE_DRIVE_INSTRUCTIONS_URL")
 }
